@@ -1,0 +1,84 @@
+---
+title: "EcoTaxa_Test"
+output: html_document
+date: "2025-01-10"
+---
+```{r packages here, include=FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+```{r import TSV, include=FALSE}
+# List all TSV files in the folder on your external hard drive
+tsv_files <- list.files(path = "/Volumes/Erin_A/EcoTaxa_Test/Ecotaxa_Exported_data", 
+                        pattern = "\\.tsv$",    # This will match all .tsv files
+                        full.names = TRUE)      # Get the full path to the files
+
+# View the list of TSV files
+print(tsv_files)
+
+# Check the column names of the first few files
+for (file in tsv_files[1:5]) {  # Check first 5 files (adjust as needed)
+  data <- read.delim(file)
+  print(colnames(data))  # Print the column names
+  print(head(data$sampleid))  # Print the first few values of sampleid (if it exists)
+}
+# Function to standardize the columns and ensure 'sampleid' exists
+# Function to standardize the columns and ensure 'status' and 'sampleid' exist
+read_and_standardize <- function(file) {
+  data <- read.delim(file)
+  
+  # Check if 'sampleid' column exists and handle it
+  if (!"sampleid" %in% colnames(data)) {
+    data$sampleid <- NA  # Add 'sampleid' column if missing, filled with NAs
+  }
+  
+  # Convert 'sampleid' to character (or logical, if you prefer)
+  data$sampleid <- as.character(data$sampleid)
+  
+  # Check if 'status' column exists and handle it
+  if ("status" %in% colnames(data)) {
+    # Convert 'status' to character (or logical, depending on your needs)
+    data$status <- as.character(data$status)
+  } else {
+    data$status <- NA  # Add 'status' column if missing, filled with NAs
+  }
+
+  return(data)
+}
+
+# Function to standardize 'taxonid' column and other columns
+read_and_standardize <- function(file) {
+  data <- read.delim(file)
+  
+  # Check if 'taxonid' column exists and handle it
+  if ("taxonid" %in% colnames(data)) {
+    # Convert 'taxonid' to character (or logical, depending on your needs)
+    data$taxonid <- as.character(data$taxonid)
+  } else {
+    # If 'taxonid' is missing, add it with NAs
+    data$taxonid <- NA
+  }
+  
+  # Check if 'sampleid' exists and standardize
+  if (!"sampleid" %in% colnames(data)) {
+    data$sampleid <- NA  # Add 'sampleid' column if missing
+  }
+  data$sampleid <- as.character(data$sampleid)
+  
+  # Check if 'status' exists and standardize
+  if ("status" %in% colnames(data)) {
+    data$status <- as.character(data$status)
+  } else {
+    data$status <- NA  # Add 'status' column if missing
+  }
+
+  return(data)
+}
+
+# Apply the function to each file and combine them
+combined_data <- bind_rows(lapply(tsv_files, read_and_standardize))
+
+# View the combined data
+head(combined_data)
+```
